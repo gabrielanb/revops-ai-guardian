@@ -55,13 +55,50 @@ export default function ClientPricing() {
   ];
 
   const pricingTemplate = [
-    { service: "Account Management Fee", defaultPrice: "$2.50", unit: "per account/month" },
-    { service: "Card Production", defaultPrice: "$3.25", unit: "per card" },
-    { service: "Card Transaction", defaultPrice: "$0.15", unit: "per transaction" },
-    { service: "Non-scheme Transaction", defaultPrice: "$0.25", unit: "per transaction" },
-    { service: "Apple Pay Transaction", defaultPrice: "$0.08", unit: "per transaction" },
-    { service: "Google Pay Transaction", defaultPrice: "$0.08", unit: "per transaction" },
-    { service: "KYC/AML Check", defaultPrice: "$1.50", unit: "per check" },
+    {
+      category: "Core",
+      items: [
+        { service: "Accounts", defaultPrice: "$2.50", basis: "Count" },
+        { service: "Cards", defaultPrice: "$3.25", basis: "Count" },
+        { service: "Scheme txn", defaultPrice: "$0.15", basis: "Count" },
+        { service: "Non scheme txn", defaultPrice: "$0.25", basis: "Count" },
+        { service: "InternalPay txn", defaultPrice: "$0.20", basis: "Count" },
+        { service: "Platform account", defaultPrice: "$50.00", basis: "Binary (Y/N)" },
+        { service: "Monthly minimums", defaultPrice: "$500.00", basis: "Calculation" },
+      ]
+    },
+    {
+      category: "Add ons",
+      items: [
+        { service: "Control centre", defaultPrice: "$100.00", basis: "Monthly" },
+        { service: "Professional services", defaultPrice: "$150.00", basis: "Hourly" },
+        { service: "SOWs", defaultPrice: "$2,500.00", basis: "Per project" },
+        { service: "App sales", defaultPrice: "$0.50", basis: "Per sale" },
+        { service: "CAR fee", defaultPrice: "$25.00", basis: "Monthly" },
+        { service: "Sandbox plus", defaultPrice: "$200.00", basis: "Monthly" },
+      ]
+    },
+    {
+      category: "Pass throughs",
+      items: [
+        { service: "ApplePay", defaultPrice: "$0.08", basis: "Count" },
+        { service: "PayTo", defaultPrice: "$0.12", basis: "Count" },
+        { service: "GreenID", defaultPrice: "$1.20", basis: "Count" },
+        { service: "Comply", defaultPrice: "$0.90", basis: "Count" },
+        { service: "Jumio", defaultPrice: "$2.10", basis: "Count" },
+        { service: "Card production", defaultPrice: "$3.25", basis: "Count" },
+        { service: "Card designs", defaultPrice: "$500.00", basis: "Binary (Y/N)" },
+        { service: "Regular Postage", defaultPrice: "$0.75", basis: "Count" },
+        { service: "Courier", defaultPrice: "$15.00", basis: "Count" },
+      ]
+    },
+    {
+      category: "Special variations",
+      items: [
+        { service: "Discounts", defaultPrice: "-$50.00", basis: "Percentage/Fixed" },
+        { service: "Refunds/Rebates", defaultPrice: "-$25.00", basis: "Percentage/Fixed" },
+      ]
+    }
   ];
 
   return (
@@ -84,17 +121,24 @@ export default function ClientPricing() {
               <DialogHeader>
                 <DialogTitle>Default Pricing Template</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4">
-                {pricingTemplate.map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium">{item.service}</p>
-                      <p className="text-sm text-muted-foreground">{item.unit}</p>
-                    </div>
-                    <Input 
-                      defaultValue={item.defaultPrice} 
-                      className="w-24 text-right"
-                    />
+              <div className="space-y-6">
+                {pricingTemplate.map((category, categoryIndex) => (
+                  <div key={categoryIndex} className="space-y-3">
+                    <h3 className="font-semibold text-lg text-primary border-b pb-2">
+                      {category.category}
+                    </h3>
+                    {category.items.map((item, itemIndex) => (
+                      <div key={itemIndex} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <p className="font-medium">{item.service}</p>
+                          <p className="text-sm text-muted-foreground">Basis: {item.basis}</p>
+                        </div>
+                        <Input 
+                          defaultValue={item.defaultPrice} 
+                          className="w-28 text-right"
+                        />
+                      </div>
+                    ))}
                   </div>
                 ))}
                 <div className="flex justify-end gap-2 pt-4">
@@ -171,22 +215,29 @@ export default function ClientPricing() {
                               <Input defaultValue={client.status} />
                             </div>
                           </div>
-                          {pricingTemplate.map((item, index) => (
-                            <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                              <div>
-                                <p className="font-medium">{item.service}</p>
-                                <p className="text-sm text-muted-foreground">{item.unit}</p>
-                                <p className="text-xs text-muted-foreground">Default: {item.defaultPrice}</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Input 
-                                  defaultValue={item.defaultPrice} 
-                                  className="w-24 text-right"
-                                />
-                                <Badge variant="outline" className="text-xs">
-                                  Custom
-                                </Badge>
-                              </div>
+                          {pricingTemplate.map((category, categoryIndex) => (
+                            <div key={categoryIndex} className="space-y-3 mb-6">
+                              <h4 className="font-semibold text-primary border-b pb-1">
+                                {category.category}
+                              </h4>
+                              {category.items.map((item, itemIndex) => (
+                                <div key={itemIndex} className="flex items-center justify-between p-3 border rounded-lg">
+                                  <div>
+                                    <p className="font-medium">{item.service}</p>
+                                    <p className="text-sm text-muted-foreground">Basis: {item.basis}</p>
+                                    <p className="text-xs text-muted-foreground">Default: {item.defaultPrice}</p>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Input 
+                                      defaultValue={item.defaultPrice} 
+                                      className="w-28 text-right"
+                                    />
+                                    <Badge variant="outline" className="text-xs">
+                                      Custom
+                                    </Badge>
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           ))}
                           <div className="flex justify-end gap-2 pt-4">
