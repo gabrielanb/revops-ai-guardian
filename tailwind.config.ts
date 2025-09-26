@@ -71,6 +71,7 @@ export default {
           margin: "hsl(var(--margin))",
           neutral: "hsl(var(--neutral))",
         },
+        navy: "hsl(var(--navy))",
       },
       backgroundImage: {
         "gradient-primary": "var(--gradient-primary)",

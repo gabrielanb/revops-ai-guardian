@@ -19,6 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Users, Settings, Plus, Edit } from "lucide-react";
 
 export default function ClientPricing() {
@@ -121,7 +122,8 @@ export default function ClientPricing() {
               <DialogHeader>
                 <DialogTitle>Default Pricing Template</DialogTitle>
               </DialogHeader>
-              <div className="space-y-6">
+              <ScrollArea className="h-[500px] pr-4">
+                <div className="space-y-6">
                 {pricingTemplate.map((category, categoryIndex) => (
                   <div key={categoryIndex} className="space-y-3">
                     <h3 className="font-semibold text-lg text-primary border-b pb-2">
@@ -146,6 +148,7 @@ export default function ClientPricing() {
                   <Button>Save Template</Button>
                 </div>
               </div>
+              </ScrollArea>
             </DialogContent>
           </Dialog>
           <Button>
@@ -204,7 +207,8 @@ export default function ClientPricing() {
                         <DialogHeader>
                           <DialogTitle>Edit Pricing - {client.name}</DialogTitle>
                         </DialogHeader>
-                        <div className="space-y-4">
+                        <ScrollArea className="h-[500px] pr-4">
+                          <div className="space-y-4">
                           <div className="grid grid-cols-2 gap-4 mb-4">
                             <div>
                               <Label>Client Name</Label>
@@ -245,6 +249,7 @@ export default function ClientPricing() {
                             <Button>Save Changes</Button>
                           </div>
                         </div>
+                        </ScrollArea>
                       </DialogContent>
                     </Dialog>
                   </TableCell>

@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import ClientPricing from "./pages/ClientPricing";
 import AIOptimization from "./pages/AIOptimization";
 import DisputeResolution from "./pages/DisputeResolution";
+import AdhocCharges from "./pages/AdhocCharges";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/pricing" element={<ClientPricing />} />
+            <Route path="/adhoc" element={<AdhocCharges />} />
             <Route path="/optimization" element={<AIOptimization />} />
             <Route path="/disputes" element={<DisputeResolution />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
