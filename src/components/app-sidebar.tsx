@@ -1,13 +1,9 @@
 import { NavLink, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard,
-  Users,
-  DollarSign,
-  MessageSquare,
-  Settings,
-  TrendingUp,
-  CreditCard,
   FileText,
+  DollarSign,
+  TrendingUp,
+  BarChart3,
 } from "lucide-react";
 
 import {
@@ -23,17 +19,10 @@ import {
 } from "@/components/ui/sidebar";
 
 const mainItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Client Pricing", url: "/pricing", icon: Users },
-  { title: "Ad-hoc Charges", url: "/adhoc", icon: DollarSign },
-  { title: "AI Optimization", url: "/optimization", icon: TrendingUp },
-  { title: "Dispute Resolution", url: "/disputes", icon: MessageSquare },
-];
-
-const billingItems = [
-  { title: "Invoices", url: "/invoices", icon: FileText },
-  { title: "Transactions", url: "/transactions", icon: CreditCard },
-  { title: "Ad-hoc Charges", url: "/adhoc", icon: DollarSign },
+  { title: "Invoicing", url: "/invoicing", icon: FileText },
+  { title: "Fees", url: "/fees", icon: DollarSign },
+  { title: "Forecasting", url: "/forecasting", icon: TrendingUp },
+  { title: "Cost", url: "/cost", icon: BarChart3 },
 ];
 
 export function AppSidebar() {
@@ -50,7 +39,7 @@ export function AppSidebar() {
       <SidebarContent className="py-4">
         <div className="px-3 mb-6">
           <h2 className={`font-bold text-primary ${state === "collapsed" ? "hidden" : "text-xl"}`}>
-            FinBill Pro
+            Shaype Finance Platform
           </h2>
         </div>
 
@@ -64,26 +53,6 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} end className={getNavCls}>
-                      <item.icon className="h-4 w-4" />
-                      {state !== "collapsed" && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel className={state === "collapsed" ? "sr-only" : ""}>
-            Billing
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {billingItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink to={item.url} className={getNavCls}>
                       <item.icon className="h-4 w-4" />
                       {state !== "collapsed" && <span>{item.title}</span>}
                     </NavLink>

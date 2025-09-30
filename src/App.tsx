@@ -4,11 +4,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import Dashboard from "./pages/Dashboard";
-import ClientPricing from "./pages/ClientPricing";
-import AIOptimization from "./pages/AIOptimization";
-import DisputeResolution from "./pages/DisputeResolution";
-import AdhocCharges from "./pages/AdhocCharges";
+import Invoicing from "./pages/Invoicing";
+import Fees from "./pages/Fees";
+import Forecasting from "./pages/Forecasting";
+import Cost from "./pages/Cost";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,11 +20,11 @@ const App = () => (
       <BrowserRouter>
         <DashboardLayout>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/pricing" element={<ClientPricing />} />
-            <Route path="/adhoc" element={<AdhocCharges />} />
-            <Route path="/optimization" element={<AIOptimization />} />
-            <Route path="/disputes" element={<DisputeResolution />} />
+            <Route path="/" element={<Invoicing />} />
+            <Route path="/invoicing" element={<Invoicing />} />
+            <Route path="/fees" element={<Fees />} />
+            <Route path="/forecasting" element={<Forecasting />} />
+            <Route path="/cost" element={<Cost />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
