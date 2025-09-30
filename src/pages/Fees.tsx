@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, ChevronDown, ChevronRight } from "lucide-react";
 
 interface FeeTier {
   lowerBound: number;
@@ -55,6 +55,7 @@ export default function Fees() {
   const [searchDate, setSearchDate] = useState("");
   const [fees, setFees] = useState<Fee[]>([]);
   const [loading, setLoading] = useState(false);
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
   const addTier = () => {
     setFeeTiers([...feeTiers, { lowerBound: 0, upperBound: 0, amount: 0 }]);
@@ -73,6 +74,16 @@ export default function Fees() {
       [field]: field === "amount" ? parseFloat(value) || 0 : parseInt(value) || 0,
     };
     setFeeTiers(newTiers);
+  };
+
+  const toggleRowExpansion = (feeId: string) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(feeId)) {
+      newExpanded.delete(feeId);
+    } else {
+      newExpanded.add(feeId);
+    }
+    setExpandedRows(newExpanded);
   };
 
   const handleSaveFee = async () => {
@@ -273,16 +284,16 @@ export default function Fees() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-8">
             <div className="flex items-center space-x-2">
-              <Checkbox id="enabled" checked={enabled} onCheckedChange={(checked) => setEnabled(checked === true)} />
+              <Switch id="enabled" checked={enabled} onCheckedChange={setEnabled} />
               <Label htmlFor="enabled">Enabled</Label>
             </div>
             <div className="flex items-center space-x-2">
-              <Checkbox
+              <Switch
                 id="monthlyMin"
                 checked={monthlyMinimumContributor}
-                onCheckedChange={(checked) => setMonthlyMinimumContributor(checked === true)}
+                onCheckedChange={setMonthlyMinimumContributor}
               />
               <Label htmlFor="monthlyMin">Monthly Minimum Contributor</Label>
             </div>
@@ -301,26 +312,25 @@ export default function Fees() {
                 <div className="space-y-2">
                   <Label>Lower Bound</Label>
                   <Input
-                    type="number"
                     value={tier.lowerBound}
                     onChange={(e) => updateTier(index, "lowerBound", e.target.value)}
+                    inputMode="numeric"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Upper Bound</Label>
                   <Input
-                    type="number"
                     value={tier.upperBound}
                     onChange={(e) => updateTier(index, "upperBound", e.target.value)}
+                    inputMode="numeric"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>Amount</Label>
                   <Input
-                    type="number"
-                    step="0.01"
                     value={tier.amount}
                     onChange={(e) => updateTier(index, "amount", e.target.value)}
+                    inputMode="decimal"
                   />
                 </div>
                 <Button
@@ -381,6 +391,7 @@ export default function Fees() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-12"></TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Structure</TableHead>
@@ -388,21 +399,53 @@ export default function Fees() {
                     <TableHead>End Date</TableHead>
                     <TableHead>Frequency</TableHead>
                     <TableHead>Currency</TableHead>
-                    <TableHead>Tiers</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {fees.map((fee) => (
-                    <TableRow key={fee.id}>
-                      <TableCell>{fee.type}</TableCell>
-                      <TableCell>{fee.category}</TableCell>
-                      <TableCell>{fee.feeStructure}</TableCell>
-                      <TableCell>{fee.startDate}</TableCell>
-                      <TableCell>{fee.endDate || "-"}</TableCell>
-                      <TableCell>{fee.frequency}</TableCell>
-                      <TableCell>{fee.currency}</TableCell>
-                      <TableCell>{fee.feeTiers.length}</TableCell>
-                    </TableRow>
+                    <>
+                      <TableRow key={fee.id} className="cursor-pointer" onClick={() => fee.feeStructure === "TIERED" && toggleRowExpansion(fee.id)}>
+                        <TableCell>
+                          {fee.feeStructure === "TIERED" && (
+                            expandedRows.has(fee.id) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />
+                          )}
+                        </TableCell>
+                        <TableCell>{fee.type}</TableCell>
+                        <TableCell>{fee.category}</TableCell>
+                        <TableCell>{fee.feeStructure}</TableCell>
+                        <TableCell>{fee.startDate}</TableCell>
+                        <TableCell>{fee.endDate || "-"}</TableCell>
+                        <TableCell>{fee.frequency}</TableCell>
+                        <TableCell>{fee.currency}</TableCell>
+                      </TableRow>
+                      {fee.feeStructure === "TIERED" && expandedRows.has(fee.id) && (
+                        <TableRow>
+                          <TableCell colSpan={8} className="bg-muted/50">
+                            <div className="p-4">
+                              <h4 className="font-semibold mb-2">Fee Tiers</h4>
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead>Lower Bound</TableHead>
+                                    <TableHead>Upper Bound</TableHead>
+                                    <TableHead>Amount</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {fee.feeTiers.map((tier) => (
+                                    <TableRow key={tier.id}>
+                                      <TableCell>{tier.lowerBound}</TableCell>
+                                      <TableCell>{tier.upperBound}</TableCell>
+                                      <TableCell>${tier.amount.toFixed(2)}</TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </>
                   ))}
                 </TableBody>
               </Table>

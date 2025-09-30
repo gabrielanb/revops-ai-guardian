@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 interface BillingUnits {
   count?: number;
@@ -56,6 +57,7 @@ export default function Invoicing() {
   const [invoiceDate, setInvoiceDate] = useState("");
   const [invoiceData, setInvoiceData] = useState<InvoiceResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
   const handleCreateInvoice = async () => {
     if (!clientReference || !invoiceDate) {
@@ -91,14 +93,29 @@ export default function Invoicing() {
     }
   };
 
-  const renderBillingUnits = (units: BillingUnits) => {
-    if (units.count !== undefined) return units.count;
+  const renderBillingUnits = (units: BillingUnits, chargableFee: ChargableFee) => {
+    if (units.count !== undefined) {
+      const applicableTier = chargableFee.fee.feeTiers.find(
+        tier => units.count! >= tier.lowerBound && units.count! <= tier.upperBound
+      );
+      return `${units.count}${applicableTier ? ` @ $${applicableTier.amount.toFixed(2)}` : ''}`;
+    }
     if (units.feeApplies !== undefined) return units.feeApplies ? "Yes" : "No";
     if (units.percentageOf !== undefined) return `${units.percentageOf}%`;
     return "-";
   };
 
-  const renderFeesTable = (fees: ChargableFee[], title: string) => {
+  const toggleRowExpansion = (index: number) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(index)) {
+      newExpanded.delete(index);
+    } else {
+      newExpanded.add(index);
+    }
+    setExpandedRows(newExpanded);
+  };
+
+  const renderFeesTable = (fees: ChargableFee[], title: string, startIndex: number) => {
     if (!fees || fees.length === 0) return null;
 
     return (
@@ -107,6 +124,7 @@ export default function Invoicing() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12"></TableHead>
               <TableHead>Fee Type</TableHead>
               <TableHead>Fee Category</TableHead>
               <TableHead>Fee Structure</TableHead>
@@ -115,15 +133,56 @@ export default function Invoicing() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {fees.map((chargableFee, index) => (
-              <TableRow key={index}>
-                <TableCell>{chargableFee.fee.type}</TableCell>
-                <TableCell>{chargableFee.fee.category}</TableCell>
-                <TableCell>{chargableFee.fee.feeStructure}</TableCell>
-                <TableCell>${chargableFee.chargeAmount.toFixed(2)}</TableCell>
-                <TableCell>{renderBillingUnits(chargableFee.billingUnits)}</TableCell>
-              </TableRow>
-            ))}
+            {fees.map((chargableFee, index) => {
+              const rowIndex = startIndex + index;
+              return (
+                <>
+                  <TableRow 
+                    key={rowIndex} 
+                    className={chargableFee.fee.feeStructure === "TIERED" ? "cursor-pointer" : ""}
+                    onClick={() => chargableFee.fee.feeStructure === "TIERED" && toggleRowExpansion(rowIndex)}
+                  >
+                    <TableCell>
+                      {chargableFee.fee.feeStructure === "TIERED" && (
+                        expandedRows.has(rowIndex) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />
+                      )}
+                    </TableCell>
+                    <TableCell>{chargableFee.fee.type}</TableCell>
+                    <TableCell>{chargableFee.fee.category}</TableCell>
+                    <TableCell>{chargableFee.fee.feeStructure}</TableCell>
+                    <TableCell>${chargableFee.chargeAmount.toFixed(2)}</TableCell>
+                    <TableCell>{renderBillingUnits(chargableFee.billingUnits, chargableFee)}</TableCell>
+                  </TableRow>
+                  {chargableFee.fee.feeStructure === "TIERED" && expandedRows.has(rowIndex) && (
+                    <TableRow>
+                      <TableCell colSpan={6} className="bg-muted/50">
+                        <div className="p-4">
+                          <h4 className="font-semibold mb-2">Fee Tiers</h4>
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Lower Bound</TableHead>
+                                <TableHead>Upper Bound</TableHead>
+                                <TableHead>Amount</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {chargableFee.fee.feeTiers.map((tier) => (
+                                <TableRow key={tier.id}>
+                                  <TableCell>{tier.lowerBound}</TableCell>
+                                  <TableCell>{tier.upperBound}</TableCell>
+                                  <TableCell>${tier.amount.toFixed(2)}</TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
@@ -174,9 +233,9 @@ export default function Invoicing() {
             <CardTitle>Invoice Details</CardTitle>
           </CardHeader>
           <CardContent>
-            {renderFeesTable(invoiceData.coreFees, "Core Fees")}
-            {renderFeesTable(invoiceData.addOnFees, "Add-on Fees")}
-            {renderFeesTable(invoiceData.passthroughFees, "Passthrough Fees")}
+            {renderFeesTable(invoiceData.coreFees, "Core Fees", 0)}
+            {renderFeesTable(invoiceData.addOnFees, "Add-on Fees", invoiceData.coreFees.length)}
+            {renderFeesTable(invoiceData.passthroughFees, "Passthrough Fees", invoiceData.coreFees.length + invoiceData.addOnFees.length)}
           </CardContent>
         </Card>
       )}
